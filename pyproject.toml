@@ -1,6 +1,6 @@
 [project]
 name = "xarray-tree"
-description = "Tree of xarray datasets."
+description = "Tree of Xarray datasets."
 dynamic = ["version"]
 license = {text = "MIT"}
 authors = [
