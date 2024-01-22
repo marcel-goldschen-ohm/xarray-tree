@@ -551,6 +551,16 @@ class XarrayTreeNode():
         for child in self.children.values():
             child.dump(indent + 4)
     
+    # i/o
+    
+    def to_zarr(self, filepath: str) -> None:
+        print('to_zarr:', filepath)
+        pass # TODO: implement
+    
+    def from_zarr(self, filepath: str) -> None:
+        print('from_zarr:', filepath)
+        pass # TODO: implement
+    
     # static methods
 
     @staticmethod
