@@ -560,7 +560,8 @@ class XarrayTreeNode():
         self.name = file
         node = self
         while node is not None:
-            node.dataset.to_zarr(path, group=node.path, mode='w')
+            group_path = '/'.join(node.path.strip('/').split('/')[1:])
+            node.dataset.to_zarr(filepath, group=group_path, mode='w')
             node = node.next_depth_first()
     
     @staticmethod
