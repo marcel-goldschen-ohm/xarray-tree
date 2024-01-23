@@ -567,11 +567,11 @@ class XarrayTreeNode():
     def from_zarr(filepath: str, parent_group: zarr.hierarchy.Group = None, parent_node: XarrayTreeNode = None) -> XarrayTreeNode:
         if parent_group is None:
             parent_node = XarrayTreeNode(os.path.basename(filepath))
-            parent_node.dataset = xr.open_zarr(filepath)
+            parent_node.dataset = xr.open_zarr(filepath, consolidated=False)
             parent_group = zarr.open_group(filepath)
         for name, group in parent_group.groups():
             node = XarrayTreeNode(name, parent=parent_node)
-            node.dataset = xr.open_zarr(filepath, group=group.path)
+            node.dataset = xr.open_zarr(filepath, group=group.path, consolidated=False)
             if group.groups():
                 XarrayTreeNode.from_zarr(filepath, group, node)
         return parent_node
