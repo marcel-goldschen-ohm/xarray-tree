@@ -8,15 +8,17 @@ try:
     from datatree import DataTree
 except ImportError:
     DataTree = None
+import zarr
+import os
 import scipy as sp
 import lmfit
 
 
 class XarrayTreeNode():
 
-    def __init__(self, name: str, dataset: xr.Dataset | None = None, parent: XarrayTreeNode | None = None) -> None:
+    def __init__(self, name: str, dataset: xr.Dataset = xr.Dataset(), parent: XarrayTreeNode | None = None) -> None:
         self._name: str = name
-        self.dataset: xr.Dataset | None = dataset
+        self.dataset: xr.Dataset = dataset
         self._parent: XarrayTreeNode | None = None  # will set to parent below
         self.children: dict[str, XarrayTreeNode] = {}
         # attach to tree
@@ -553,13 +555,26 @@ class XarrayTreeNode():
     
     # i/o
     
-    def to_zarr(self, filepath: str) -> None:
-        print('to_zarr:', filepath)
-        pass # TODO: implement
+    def to_zarr(self, filepath: str = None) -> None:
+        path, file = os.path.split(filepath)
+        self.name = file
+        node = self
+        while node is not None:
+            node.dataset.to_zarr(path, group=node.path, mode='w')
+            node = node.next_depth_first()
     
-    def from_zarr(self, filepath: str) -> None:
-        print('from_zarr:', filepath)
-        pass # TODO: implement
+    @staticmethod
+    def from_zarr(filepath: str, parent_group: zarr.hierarchy.Group = None, parent_node: XarrayTreeNode = None) -> XarrayTreeNode:
+        if parent_group is None:
+            parent_node = XarrayTreeNode(os.path.basename(filepath))
+            parent_node.dataset = xr.open_zarr(filepath)
+            parent_group = zarr.open_group(filepath)
+        for name, group in parent_group.groups():
+            node = XarrayTreeNode(name, parent=parent_node)
+            node.dataset = xr.open_zarr(filepath, group=group.path)
+            if group.groups():
+                XarrayTreeNode.from_zarr(filepath, group, node)
+        return parent_node
     
     # static methods
 
@@ -728,6 +743,12 @@ def test_tree():
     root_node.dump()
    
     print('-----\n ALL TESTS: OK')
+
+    root_node.to_zarr('test.zarr')
+
+    root_node_2 = XarrayTreeNode.from_zarr('test.zarr')
+    print('-----\n')
+    root_node_2.dump()
 
 
 if __name__ == '__main__':
