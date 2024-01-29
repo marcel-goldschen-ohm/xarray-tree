@@ -15,7 +15,7 @@ except ImportError:
 
 class XarrayTreeNode():
 
-    def __init__(self, name: str, data: xr.Dataset | xr.DataArray = xr.Dataset(), parent: XarrayTreeNode = None) -> None:
+    def __init__(self, name: str, data: xr.Dataset = xr.Dataset(), parent: XarrayTreeNode = None) -> None:
         # node data
         self._name: str = name
         self.data: xr.Dataset = data
@@ -50,20 +50,6 @@ class XarrayTreeNode():
         self._name = name
         # update key in self.parent.children
         self.parent.children = {node.name: node for node in self.parent.children.values()}
-    
-    # xarray dataset
-    
-    @property
-    def data(self) -> xr.Dataset:
-        return self._data
-    
-    @data.setter
-    def data(self, data: xr.Dataset | xr.DataArray) -> None:
-        if isinstance(data, xr.DataArray):
-            data = xr.Dataset(data_vars={data.name: data})
-        elif not isinstance(data, xr.Dataset):
-            raise TypeError('data must be an xarray Dataset or DataArray')
-        self._data = data
     
     # tree linkage
     
